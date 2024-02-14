@@ -1,7 +1,9 @@
 package com.example.a24_02_supvincinantes.ui.screens
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +27,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,6 +58,13 @@ fun SearchScreenPreview() {
 //Composable représentant l'ensemble de l'écran
 @Composable
 fun SearchScreen() {
+
+    val searchText = remember { mutableStateOf("") }
+
+    val filterList = pictureList.filter {
+        it.text.contains(searchText.value, true)
+    }
+
     //Couleur à retirer lors de l'utilisation des thèmes de couleur
     Column(modifier = Modifier
         .background(MaterialTheme.colorScheme.outline)
@@ -60,14 +72,15 @@ fun SearchScreen() {
 
     ) {
 
-        SearchBar()
+        SearchBar( searchText =  searchText)
 
         Spacer(Modifier.size(8.dp))
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.weight(1f)) {
-            items(pictureList.size) {
-                PictureRowItem(data = pictureList[it])
+
+            items(filterList.size) {
+                PictureRowItem(data = filterList[it])
             }
         }
 
@@ -76,7 +89,7 @@ fun SearchScreen() {
             horizontalArrangement=Arrangement.Center) {
 
             Button(
-                onClick = { /* Do something! */ },
+                onClick = { searchText.value = "" },
                 contentPadding = ButtonDefaults.ButtonWithIconContentPadding
             ) {
                 Icon(
@@ -111,6 +124,8 @@ fun SearchScreen() {
 @Composable
 fun PictureRowItem(modifier: Modifier = Modifier, data: PictureBean) {
 
+    var expended = remember {mutableStateOf(false)}
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -136,16 +151,21 @@ fun PictureRowItem(modifier: Modifier = Modifier, data: PictureBean) {
 
         Column(
             modifier =
-            Modifier.padding(8.dp)
+            Modifier
+                .padding(8.dp)
+                .clickable {
+                    expended.value = !expended.value
+                }
         ) {
             Text(
                 text = data.text,
                 fontSize = 20.sp
             )
             Text(
-                text = data.longText.take(20) + "...",
+                text = if(expended.value) data.longText else (data.longText.take(20) + "..."),
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.animateContentSize()
             )
         }
     }
@@ -155,10 +175,14 @@ fun PictureRowItem(modifier: Modifier = Modifier, data: PictureBean) {
 
 
 @Composable
-fun SearchBar(modifier: Modifier = Modifier) {
+fun SearchBar(modifier: Modifier = Modifier, searchText: MutableState<String>) {
+
     TextField(
-        value = "", //Valeur par défaut
-        onValueChange = {newValue->}, //Action
+        value = searchText.value, //Valeur par défaut
+        onValueChange = {newValue->
+                       searchText.value = newValue
+
+        }, //Action
         leadingIcon = { //Image d'icone
             Icon(
                 imageVector = Icons.Default.Search,
