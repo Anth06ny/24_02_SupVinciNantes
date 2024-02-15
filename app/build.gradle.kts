@@ -76,6 +76,14 @@ dependencies {
     //Navigation
     implementation("androidx.navigation:navigation-compose:2.+")
 
+    //ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.+")
 
 
+    //Utilisation générale
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:+")
+//LifeCycleScope
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.+")
+//ViewModelScope
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.+")
 }

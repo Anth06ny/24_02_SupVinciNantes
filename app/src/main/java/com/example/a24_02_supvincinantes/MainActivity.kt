@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -37,6 +38,7 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation() {
 
     val navController : NavHostController = rememberNavController()
+    val viewModel : MainViewModel = viewModel()
 
     //Import version avec Composable
     NavHost(
@@ -46,7 +48,7 @@ fun AppNavigation() {
         //Route 1 vers notre SearchScreen
         composable(Routes.SearchScreen.route) {
             //on peut passer le navController à un écran s'il déclenche des navigations
-            SearchScreen(navController)
+            SearchScreen(navController, viewModel)
         }
 
         //Route 2 vers un écran de détail
@@ -55,7 +57,7 @@ fun AppNavigation() {
             arguments = listOf(navArgument("data") { type = NavType.IntType })
         ) {
             val position = it.arguments?.getInt("data") ?: 0
-            DetailScreen(position, navController)
+            DetailScreen(position, navController, viewModel)
         }
     }
 }

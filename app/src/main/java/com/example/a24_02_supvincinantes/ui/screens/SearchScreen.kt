@@ -39,9 +39,9 @@ import androidx.navigation.NavHostController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
+import com.example.a24_02_supvincinantes.MainViewModel
 import com.example.a24_02_supvincinantes.R
 import com.example.a24_02_supvincinantes.model.PictureBean
-import com.example.a24_02_supvincinantes.model.pictureList
 import com.example.a24_02_supvincinantes.ui.Routes
 import com.example.a24_02_supvincinantes.ui.theme._24_02_SupVinciNantesTheme
 
@@ -59,12 +59,13 @@ fun SearchScreenPreview() {
 
 //Composable représentant l'ensemble de l'écran
 @Composable
-fun SearchScreen(navController: NavHostController? = null) {
+fun SearchScreen(
+    navController: NavHostController? = null,
+    viewModel: MainViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    ) {
 
-    val searchText = remember { mutableStateOf("") }
-
-    val filterList = pictureList.filter {
-        it.text.contains(searchText.value, true)
+    val filterList = viewModel.myList.filter {
+        it.text.contains(viewModel.searchText.value, true)
     }
 
     //Couleur à retirer lors de l'utilisation des thèmes de couleur
@@ -74,7 +75,7 @@ fun SearchScreen(navController: NavHostController? = null) {
 
     ) {
 
-        SearchBar( searchText =  searchText)
+        SearchBar( searchText =  viewModel.searchText)
 
         Spacer(Modifier.size(8.dp))
 
@@ -85,6 +86,9 @@ fun SearchScreen(navController: NavHostController? = null) {
                 PictureRowItem(
                     data = filterList[it],
                     onPictureClic = {
+                        //Si on utilise le viewModel pour garder la valeur
+                        viewModel.selectedPicture.value = filterList[it]
+
                         navController?.navigate(Routes.DetailScreen.withPosition(it))
                     }
                 )
@@ -96,7 +100,7 @@ fun SearchScreen(navController: NavHostController? = null) {
             horizontalArrangement=Arrangement.Center) {
 
             Button(
-                onClick = { searchText.value = "" },
+                onClick = { viewModel.uploadSearchText("")  },
                 contentPadding = ButtonDefaults.ButtonWithIconContentPadding
             ) {
                 Icon(
@@ -111,7 +115,7 @@ fun SearchScreen(navController: NavHostController? = null) {
             Spacer(Modifier.size(8.dp))
 
             Button(
-                onClick = { /* Do something! */ },
+                onClick = { viewModel.loadData() },
                 contentPadding = ButtonDefaults.ButtonWithIconContentPadding
             ) {
                 Icon(

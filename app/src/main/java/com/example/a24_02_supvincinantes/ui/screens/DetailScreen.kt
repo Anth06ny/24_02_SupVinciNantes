@@ -22,12 +22,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
+import com.example.a24_02_supvincinantes.MainViewModel
 import com.example.a24_02_supvincinantes.R
-import com.example.a24_02_supvincinantes.model.pictureList
 import com.example.a24_02_supvincinantes.ui.theme._24_02_SupVinciNantesTheme
 
 //Code affiché dans la Preview, thème claire, thème sombre
@@ -37,8 +38,6 @@ import com.example.a24_02_supvincinantes.ui.theme._24_02_SupVinciNantesTheme
 fun DetailScreenPreview() {
     _24_02_SupVinciNantesTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-
-
             DetailScreen(0)
         }
     }
@@ -48,9 +47,13 @@ fun DetailScreenPreview() {
 @Composable //Position du PictureBean dans la liste
 fun DetailScreen(
     positionPicture: Int,
-    navController: NavHostController? = null){
+    navController: NavHostController? = null,
+    viewModel : MainViewModel = viewModel()
+    ){
 
-   val pictureBean =  pictureList.get(positionPicture)
+   //val pictureBean = viewModel.myList.get(positionPicture)
+    //le !! permet d'indiquer au compilateur de ne plus verifier la nullité
+   val pictureBean = viewModel.selectedPicture.value!!
 
 
     Column(horizontalAlignment = Alignment.CenterHorizontally,
