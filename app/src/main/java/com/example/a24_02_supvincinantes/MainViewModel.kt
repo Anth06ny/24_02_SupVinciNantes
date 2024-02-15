@@ -14,6 +14,7 @@ class MainViewModel : ViewModel() {
     val searchText = mutableStateOf("")
     val myList = mutableStateListOf<PictureBean>()
     val runInProgress = mutableStateOf(false)
+    val errorMessage = mutableStateOf("")
 
 
     val selectedPicture = mutableStateOf<PictureBean?>(null)
@@ -25,27 +26,30 @@ class MainViewModel : ViewModel() {
     fun loadData() {//Simulation de chargement de donnée
 
         runInProgress.value = true
+        errorMessage.value = ""
 
         viewModelScope.launch(Dispatchers.Default) {
 
+            try {
 
-            val listWeather = WeatherAPI.loadWeatherAround(searchText.value)
-            val listPicture = listWeather.map {
-                PictureBean(
-                    it.weather.getOrNull(0)?.icon ?: "",
-                    it.name,
-                    "Il fait ${it.main.temp}° à ${it.name} avec un vent de ${it.wind.speed} m/s"
+                val listWeather = WeatherAPI.loadWeatherAround(searchText.value)
+                val listPicture = listWeather.map {
+                    PictureBean(
+                        it.weather.getOrNull(0)?.icon ?: "",
+                        it.name,
+                        "Il fait ${it.main.temp}° à ${it.name} avec un vent de ${it.wind.speed} m/s"
                     )
+                }
+                myList.clear()
+                //Mon appel d'API
+                myList.addAll(listPicture) //Charge la liste en mode mélangé
+            } catch (e: Exception) {
+                e.printStackTrace()
+                errorMessage.value = "Erreur : ${e.message}"
             }
-            myList.clear()
-            //Mon appel d'API
-            myList.addAll(listPicture) //Charge la liste en mode mélangé
 
             runInProgress.value = false
         }
-
-
-
 
     }
 }

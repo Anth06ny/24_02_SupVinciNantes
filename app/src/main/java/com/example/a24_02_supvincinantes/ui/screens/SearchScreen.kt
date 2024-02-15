@@ -1,6 +1,7 @@
 package com.example.a24_02_supvincinantes.ui.screens
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,6 +45,7 @@ import com.bumptech.glide.integration.compose.placeholder
 import com.example.a24_02_supvincinantes.MainViewModel
 import com.example.a24_02_supvincinantes.R
 import com.example.a24_02_supvincinantes.model.PictureBean
+import com.example.a24_02_supvincinantes.ui.MyError
 import com.example.a24_02_supvincinantes.ui.Routes
 import com.example.a24_02_supvincinantes.ui.theme._24_02_SupVinciNantesTheme
 
@@ -64,30 +66,40 @@ fun SearchScreenPreview() {
 fun SearchScreen(
     navController: NavHostController? = null,
     viewModel: MainViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-    ) {
+) {
 
     val filterList = viewModel.myList.filter {
         it.text.contains(viewModel.searchText.value, true)
     }
 
     //Couleur à retirer lors de l'utilisation des thèmes de couleur
-    Column(modifier = Modifier
-        .background(MaterialTheme.colorScheme.outline)
-        .padding(8.dp),
+    Column(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.outline)
+            .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
 
     ) {
 
-        SearchBar( searchText =  viewModel.searchText)
+        SearchBar(searchText = viewModel.searchText)
 
         Spacer(Modifier.size(8.dp))
 
-        if(viewModel.runInProgress.value) {
+        //Avec Animation
+        AnimatedVisibility(visible = viewModel.runInProgress.value) {
             CircularProgressIndicator()
         }
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.weight(1f)) {
+        MyError(errorMessage = viewModel.errorMessage.value)
+
+//        if(viewModel.runInProgress.value) {
+//
+//        }
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.weight(1f)
+        ) {
 
             items(filterList.size) {
                 PictureRowItem(
@@ -104,10 +116,11 @@ fun SearchScreen(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement=Arrangement.Center) {
+            horizontalArrangement = Arrangement.Center
+        ) {
 
             Button(
-                onClick = { viewModel.uploadSearchText("")  },
+                onClick = { viewModel.uploadSearchText("") },
                 contentPadding = ButtonDefaults.ButtonWithIconContentPadding
             ) {
                 Icon(
@@ -140,12 +153,13 @@ fun SearchScreen(
 //Composable affichant 1 PictureBean
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun PictureRowItem(modifier: Modifier = Modifier,
-                   data: PictureBean,
-                   onPictureClic: ()->Unit = { }
-                   ) {
+fun PictureRowItem(
+    modifier: Modifier = Modifier,
+    data: PictureBean,
+    onPictureClic: () -> Unit = { }
+) {
 
-    var expended = remember {mutableStateOf(false)}
+    var expended = remember { mutableStateOf(false) }
 
     Row(
         modifier = modifier
@@ -186,7 +200,7 @@ fun PictureRowItem(modifier: Modifier = Modifier,
                 fontSize = 20.sp
             )
             Text(
-                text = if(expended.value) data.longText else (data.longText.take(20) + "..."),
+                text = if (expended.value) data.longText else (data.longText.take(20) + "..."),
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.animateContentSize()
@@ -203,8 +217,8 @@ fun SearchBar(modifier: Modifier = Modifier, searchText: MutableState<String>) {
 
     TextField(
         value = searchText.value, //Valeur par défaut
-        onValueChange = {newValue->
-                       searchText.value = newValue
+        onValueChange = { newValue ->
+            searchText.value = newValue
 
         }, //Action
         leadingIcon = { //Image d'icone
