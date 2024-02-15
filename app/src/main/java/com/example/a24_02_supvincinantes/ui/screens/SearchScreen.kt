@@ -35,12 +35,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import com.example.a24_02_supvincinantes.R
 import com.example.a24_02_supvincinantes.model.PictureBean
 import com.example.a24_02_supvincinantes.model.pictureList
+import com.example.a24_02_supvincinantes.ui.Routes
 import com.example.a24_02_supvincinantes.ui.theme._24_02_SupVinciNantesTheme
 
 //Code affiché dans la Preview, thème claire, thème sombre
@@ -57,7 +59,7 @@ fun SearchScreenPreview() {
 
 //Composable représentant l'ensemble de l'écran
 @Composable
-fun SearchScreen() {
+fun SearchScreen(navController: NavHostController? = null) {
 
     val searchText = remember { mutableStateOf("") }
 
@@ -80,7 +82,12 @@ fun SearchScreen() {
             modifier = Modifier.weight(1f)) {
 
             items(filterList.size) {
-                PictureRowItem(data = filterList[it])
+                PictureRowItem(
+                    data = filterList[it],
+                    onPictureClic = {
+                        navController?.navigate(Routes.DetailScreen.withPosition(it))
+                    }
+                )
             }
         }
 
@@ -122,7 +129,10 @@ fun SearchScreen() {
 //Composable affichant 1 PictureBean
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun PictureRowItem(modifier: Modifier = Modifier, data: PictureBean) {
+fun PictureRowItem(modifier: Modifier = Modifier,
+                   data: PictureBean,
+                   onPictureClic: ()->Unit = { }
+                   ) {
 
     var expended = remember {mutableStateOf(false)}
 
@@ -147,6 +157,9 @@ fun PictureRowItem(modifier: Modifier = Modifier, data: PictureBean) {
             modifier = Modifier
                 .heightIn(max = 100.dp) //Sans hauteur il prendra tous l'écran
                 .widthIn(max = 100.dp)
+                .clickable {
+                    onPictureClic()
+                }
         )
 
         Column(
