@@ -10,14 +10,11 @@ fun main() {
 //    var html = WeatherAPI.sendGet("https://www.google.fr")
 //    println(html)
 
-    val weather = WeatherAPI.loadWeather("Nice")
+    val weatherList = WeatherAPI.loadWeatherAround("Nantes")
 
-    println("Il fait ${weather.main.temp}° à ${weather.name} avec un vent de ${weather.wind.speed} m/s")
-
-    val user = WeatherAPI.loadUser()
-    println("Il s'appelle ${user.name} pour le contacter :\n" +
-            "Phone : ${user.coord?.phone ?: "-"}\n" +
-            "Mail : ${user.coord?.mail ?: "-"}")
+    weatherList.forEach {weather->
+        println("Il fait ${weather.main.temp}° à ${weather.name} avec un vent de ${weather.wind.speed} m/s\n${weather.weather.getOrNull(0)?.icon ?:"-Pas d'image"}")
+    }
 
 }
 
@@ -27,19 +24,41 @@ object WeatherAPI {
 
     const val URL_SERVER = "https://api.openweathermap.org/data/2.5"
 
-    fun loadWeather(cityName : String): WeatherBean {
-        if(cityName.length < 3) {
+    fun loadWeatherAround(cityName: String): List<WeatherBean> {
+        if (cityName.length < 3) {
             throw Exception("Il faut au moins 3 caractères")
         }
 
-       val json =  sendGet("$URL_SERVER/weather?q=$cityName&appid=b80967f0a6bd10d23e44848547b26550&units=metric&lang=fr")
+        val json = sendGet("$URL_SERVER/find?q=$cityName&appid=b80967f0a6bd10d23e44848547b26550&units=metric&lang=fr")
+
+        val res = gson.fromJson(json, WeatherAroundResult::class.java)
+
+        if(res.list.isEmpty()) {
+            throw Exception("Pas de résultat")
+        }
+
+        //Ajout de l'url de l'image complète
+        res.list.filter { it.weather.isNotEmpty() }.forEach {
+            it.weather.get(0).icon = "https://openweathermap.org/img/wn/${it.weather.get(0).icon}@4x.png"
+        }
+
+        return res.list
+    }
+
+    fun loadWeather(cityName: String): WeatherBean {
+        if (cityName.length < 3) {
+            throw Exception("Il faut au moins 3 caractères")
+        }
+
+        val json = sendGet("$URL_SERVER/weather?q=$cityName&appid=b80967f0a6bd10d23e44848547b26550&units=metric&lang=fr")
+
 
         return gson.fromJson(json, WeatherBean::class.java)
     }
 
     fun loadUser(): PersonneBean {
 
-        val json =  sendGet("https://www.amonteiro.fr/api/randomuser")
+        val json = sendGet("https://www.amonteiro.fr/api/randomuser")
 
         return gson.fromJson(json, PersonneBean::class.java)
     }
@@ -67,12 +86,20 @@ object WeatherAPI {
 /* -------------------------------- */
 // Beans
 /* -------------------------------- */
-data class WeatherBean(var main : TempBean,
-                       var name :String,
-                       var wind : WindBean)
-data class TempBean(var temp : Double)
-data class WindBean(var speed : Double)
+data class WeatherAroundResult(val list: List<WeatherBean>)
+data class WeatherBean(
+    var main: TempBean,
+    var name: String,
+    var wind: WindBean,
+    var weather: List<DescriptionBean>
+)
 
+data class TempBean(var temp: Double)
+data class WindBean(var speed: Double)
+data class DescriptionBean(
+    val description: String,
+    var icon: String,
+)
 
 /* -------------------------------- */
 // RandomUSer

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -30,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
@@ -71,13 +73,18 @@ fun SearchScreen(
     //Couleur à retirer lors de l'utilisation des thèmes de couleur
     Column(modifier = Modifier
         .background(MaterialTheme.colorScheme.outline)
-        .padding(8.dp)
+        .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
 
     ) {
 
         SearchBar( searchText =  viewModel.searchText)
 
         Spacer(Modifier.size(8.dp))
+
+        if(viewModel.runInProgress.value) {
+            CircularProgressIndicator()
+        }
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.weight(1f)) {
